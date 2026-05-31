@@ -266,4 +266,4 @@ Modern surveillance systems generate massive quantities of raw, unindexed video.
 
 ---
 
-*Built with ❤️ by the ASIP Development Team*
+*Built By Kevin Sebastian*

@@ -1,0 +1,45 @@
+# Database & Private Env Files
+.env
+.env.local
+
+# Hidden files & caches
+.idea/
+.vscode/
+.DS_Store
+__pycache__/
+*.pyc
+.pytest_cache/
+.cache/
+
+# Sub-repositories
+hf-backend/
+
+# Node.js
+node_modules/
+dist/
+build/
+.svelte-kit/
+.vercel/
+
+# Python Virtual Environments
+.venv/
+venv/
+env/
+
+# Media and Data uploads
+backend/app/uploads/
+backend/app/reports/
+backend/app/logs/
+uploads/
+reports/
+logs/
+
+# Machine Learning weights & models
+*.pt
+*.pth
+*.onnx
+ml_models/
+
+# OS/System files
+Thumbs.db
+ehthumbs.db

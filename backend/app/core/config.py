@@ -29,6 +29,8 @@ class Settings(BaseSettings):
     OPENAI_API_KEY: Optional[str] = None
     OPENAI_MODEL: str = "gpt-4o"
     GEMINI_API_KEY: Optional[str] = None
+    OPENROUTER_API_KEY: Optional[str] = None
+    OPENROUTER_MODEL: str = "meta-llama/llama-3-8b-instruct:free"
 
     # ── Computer Vision ───────────────────────────────────────────
     YOLO_MODEL: str = "yolov8x.pt"
@@ -59,6 +61,10 @@ class Settings(BaseSettings):
     @property
     def use_gemini(self) -> bool:
         return bool(self.GEMINI_API_KEY)
+
+    @property
+    def use_openrouter(self) -> bool:
+        return bool(self.OPENROUTER_API_KEY)
 
 
 settings = Settings()

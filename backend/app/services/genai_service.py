@@ -361,6 +361,58 @@ class GeminiProvider(LLMProvider):
 
 
 # ─────────────────────────────────────────────────────────────────
+#   OPENROUTER PROVIDER  (free tier / optional)
+# ─────────────────────────────────────────────────────────────────
+class OpenRouterProvider(LLMProvider):
+    """OpenRouter API provider — free tier developer LLMs."""
+
+    provider_name = "openrouter"
+
+    def __init__(self):
+        self.model_name = settings.OPENROUTER_MODEL
+        from openai import AsyncOpenAI
+        self._client = AsyncOpenAI(
+            api_key=settings.OPENROUTER_API_KEY,
+            base_url="https://openrouter.ai/api/v1",
+        )
+        logger.info("llm_provider_initialized", provider="openrouter", model=self.model_name)
+
+    async def generate_incident_summary(self, event_data: Dict[str, Any]) -> Dict[str, Any]:
+        prompt = self._build_incident_prompt(event_data)
+        try:
+            response = await self._client.chat.completions.create(
+                model=self.model_name,
+                messages=[
+                    {"role": "system", "content": "You are an expert security analyst AI. Always respond with valid JSON only."},
+                    {"role": "user", "content": prompt},
+                ],
+                temperature=0.3,
+                max_tokens=512,
+            )
+            return self._parse_json_response(response.choices[0].message.content)
+        except Exception as e:
+            logger.error("openrouter_request_failed", error=str(e))
+            return self._parse_json_response("")
+
+    async def generate_daily_briefing(self, stats: Dict[str, Any]) -> str:
+        prompt = self._build_briefing_prompt(stats)
+        try:
+            response = await self._client.chat.completions.create(
+                model=self.model_name,
+                messages=[
+                    {"role": "system", "content": "You are an AI security intelligence officer. Write professional briefings."},
+                    {"role": "user", "content": prompt},
+                ],
+                temperature=0.5,
+                max_tokens=800,
+            )
+            return response.choices[0].message.content
+        except Exception as e:
+            logger.error("openrouter_briefing_failed", error=str(e))
+            return "Daily intelligence briefing temporarily unavailable."
+
+
+# ─────────────────────────────────────────────────────────────────
 #   AUTO-SELECTION FACTORY
 # ─────────────────────────────────────────────────────────────────
 _provider_instance: LLMProvider | None = None
@@ -372,20 +424,24 @@ def get_llm_provider() -> LLMProvider:
 
     Priority:
       1. OpenAI GPT-4o  — if OPENAI_API_KEY is set
-      2. Gemini 1.5 Flash — if GEMINI_API_KEY is set
-      3. Ollama Llama3  — local fallback (always available)
+      2. OpenRouter Free — if OPENROUTER_API_KEY is set
+      3. Gemini 1.5 Flash — if GEMINI_API_KEY is set
+      4. Ollama Llama3  — local fallback (always available)
     """
     global _provider_instance
     if _provider_instance is None:
         if settings.use_openai:
             _provider_instance = OpenAIProvider()
             logger.info("llm_auto_selected", provider="openai", reason="API key present")
+        elif settings.use_openrouter:
+            _provider_instance = OpenRouterProvider()
+            logger.info("llm_auto_selected", provider="openrouter", reason="API key present")
         elif settings.use_gemini:
             _provider_instance = GeminiProvider()
             logger.info("llm_auto_selected", provider="gemini", reason="API key present")
         else:
             _provider_instance = OllamaProvider()
-            logger.info("llm_auto_selected", provider="ollama", reason="No OpenAI/Gemini key — using local LLM")
+            logger.info("llm_auto_selected", provider="ollama", reason="No OpenAI/OpenRouter/Gemini key — using local LLM")
     return _provider_instance
 
 

@@ -206,19 +206,23 @@ This project is optimized to run fully in the cloud using serverless databases:
 #### 1. Setup Backend on Hugging Face Spaces
 1. Create a new Space on [Hugging Face](https://huggingface.co/) selecting **Docker** template (Blank).
 2. Push the files in the [hf-backend](file:///d:/AI%20Powered%20Surveillance%20Intelligence%20Platform/hf-backend/) directory to the space.
-3. Configure the following **Variables and Secrets** in your Space Settings:
+3. Configure the following variables and secrets in your Space Settings:
 
-| Name | Type | Value |
-|---|---|---|
-| `DATABASE_URL` | Secret | `postgresql+asyncpg://<postgres_url>:5432/postgres` |
-| `MONGO_URL` | Secret | `mongodb+srv://<mongo_url>/surveillance?retryWrites=true&w=majority` |
-| `REDIS_URL` | Secret | `rediss://default:<redis_token>@<redis_host>:6379/0?ssl_cert_reqs=none` |
-| `CELERY_BROKER_URL` | Secret | `rediss://default:<redis_token>@<redis_host>:6379/0?ssl_cert_reqs=none` |
-| `CELERY_RESULT_BACKEND` | Secret | `rediss://default:<redis_token>@<redis_host>:6379/0?ssl_cert_reqs=none` |
-| `OPENROUTER_API_KEY` | Secret | `sk-or-v1-your-key-here` |
-| `OPENROUTER_MODEL` | Variable | `nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free` *(or any free LLM)* |
-| `SECRET_KEY` | Secret | `your-jwt-secret-signing-key` |
-| `ENVIRONMENT` | Variable | `production` |
+## Environment Variables
+
+Create the following secrets/variables in your Hugging Face Space:
+
+| Name | Type | Example |
+|--------|--------|---------|
+| DATABASE_URL | Secret | postgresql+asyncpg://... |
+| MONGO_URL | Secret | mongodb+srv://... |
+| REDIS_URL | Secret | rediss://... |
+| CELERY_BROKER_URL | Secret | rediss://... |
+| CELERY_RESULT_BACKEND | Secret | rediss://... |
+| OPENROUTER_API_KEY | Secret | sk-or-v1-... |
+| OPENROUTER_MODEL | Variable | nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free |
+| SECRET_KEY | Secret | your-jwt-secret-key |
+| ENVIRONMENT | Variable | production |
 
 *Note: In MongoDB Atlas, you must go to **Network Access** and select **Allow Access From Anywhere** (`0.0.0.0/0`) so Hugging Face's dynamic cloud IP range isn't blocked by the TLS handshake.*
 

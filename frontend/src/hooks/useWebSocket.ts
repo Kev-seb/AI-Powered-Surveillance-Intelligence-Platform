@@ -2,7 +2,17 @@ import { useEffect, useRef, useCallback } from 'react'
 import { useAlertStore } from '@/store/alertStore'
 import toast from 'react-hot-toast'
 
-const WS_URL = `${window.location.protocol === 'https:' ? 'wss' : 'ws'}://${window.location.host}/api/v1/alerts/ws`
+const getWsUrl = () => {
+  const envUrl = import.meta.env.VITE_API_URL
+  if (envUrl) {
+    const cleaned = envUrl.endsWith('/') ? envUrl.slice(0, -1) : envUrl
+    const wsProto = cleaned.replace(/^http/, 'ws')
+    return `${wsProto}/api/v1/alerts/ws`
+  }
+  return `${window.location.protocol === 'https:' ? 'wss' : 'ws'}://${window.location.host}/api/v1/alerts/ws`
+}
+
+const WS_URL = getWsUrl()
 
 export function useWebSocket() {
   const wsRef = useRef<WebSocket | null>(null)

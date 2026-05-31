@@ -7,7 +7,7 @@ import {
   SkipBack, SkipForward, Pause, Map, Layers,
   Target, Activity, Trash2,
 } from 'lucide-react'
-import { videosApi, eventsApi, analyticsApi } from '@/api/client'
+import { videosApi, eventsApi, analyticsApi, getApiUrl } from '@/api/client'
 import { useAuthStore } from '@/store/authStore'
 import { format } from 'date-fns'
 import toast from 'react-hot-toast'
@@ -620,7 +620,7 @@ export default function VideoIntelligence() {
                 <video
                   ref={videoRef}
                   className="w-full h-full object-contain"
-                  src={`/api/v1/videos/${selectedVideoId}/stream?token=${token}`}
+                  src={getApiUrl(`/api/v1/videos/${selectedVideoId}/stream?token=${token}`)}
                   onPlay={() => setPlaying(true)}
                   onPause={() => setPlaying(false)}
                   onTimeUpdate={(e) => setVideoCurrentTime(e.currentTarget.currentTime)}

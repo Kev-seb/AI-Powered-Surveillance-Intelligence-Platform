@@ -6,7 +6,7 @@ import {
   Wifi, WifiOff, RefreshCw, Grid, LayoutGrid,
   AlertTriangle, Activity, Eye, EyeOff,
 } from 'lucide-react'
-import { eventsApi, videosApi, detectApi } from '@/api/client'
+import { eventsApi, videosApi, detectApi, getApiUrl } from '@/api/client'
 import { useAuthStore } from '@/store/authStore'
 import toast from 'react-hot-toast'
 
@@ -339,7 +339,7 @@ function CameraCell({
             {isVideoLoop && (
               <video
                 ref={videoLoopRef}
-                src={camera.streamUrl}
+                src={camera.streamUrl.startsWith('/') ? getApiUrl(camera.streamUrl) : camera.streamUrl}
                 autoPlay muted loop playsInline
                 className="absolute inset-0 w-full h-full object-cover"
               />

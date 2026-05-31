@@ -1,3 +1,14 @@
+---
+title: Asip Backend
+emoji: 🛡️
+colorFrom: pink
+colorTo: green
+sdk: docker
+pinned: false
+license: mit
+app_port: 7860
+---
+
 # 🛡️ ASIP — AI-Powered Surveillance Intelligence Platform
 
 > **ASIP** is an enterprise-grade AI-powered surveillance operations platform designed to orchestrate video stream analysis, detect security anomalies, track objects in real time, and generate natural language briefings using cloud and local LLMs. It is built as a highly optimized monorepo that scales from local Docker Compose containers to serverless cloud environments.

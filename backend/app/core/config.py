@@ -28,11 +28,12 @@ class Settings(BaseSettings):
     OLLAMA_MODEL: str = "llama3"
     OPENAI_API_KEY: Optional[str] = None
     OPENAI_MODEL: str = "gpt-4o"
+    GEMINI_API_KEY: Optional[str] = None
 
     # ── Computer Vision ───────────────────────────────────────────
-    YOLO_MODEL: str = "yolov8n.pt"
-    YOLO_CONFIDENCE: float = 0.45
-    FACE_RECOGNITION_THRESHOLD: float = 0.65
+    YOLO_MODEL: str = "yolov8x.pt"
+    YOLO_CONFIDENCE: float = 0.25
+    FACE_RECOGNITION_THRESHOLD: float = 0.40
     MAX_TRAJECTORY_LENGTH: int = 120
 
     # ── Storage ───────────────────────────────────────────────────
@@ -54,6 +55,10 @@ class Settings(BaseSettings):
     @property
     def use_openai(self) -> bool:
         return bool(self.OPENAI_API_KEY)
+
+    @property
+    def use_gemini(self) -> bool:
+        return bool(self.GEMINI_API_KEY)
 
 
 settings = Settings()

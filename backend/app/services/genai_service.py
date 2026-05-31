@@ -297,6 +297,70 @@ class OpenAIProvider(LLMProvider):
 
 
 # ─────────────────────────────────────────────────────────────────
+#   GEMINI PROVIDER  (free tier)
+# ─────────────────────────────────────────────────────────────────
+class GeminiProvider(LLMProvider):
+    """Google Gemini API provider — free tier developer LLM."""
+
+    provider_name = "gemini"
+
+    def __init__(self):
+        self.model_name = "gemini-1.5-flash"
+        self.api_key = settings.GEMINI_API_KEY
+        logger.info("llm_provider_initialized", provider="gemini", model=self.model_name)
+
+    async def generate_incident_summary(self, event_data: Dict[str, Any]) -> Dict[str, Any]:
+        import aiohttp
+        prompt = self._build_incident_prompt(event_data)
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/{self.model_name}:generateContent?key={self.api_key}"
+        
+        payload = {
+            "contents": [{"parts": [{"text": prompt}]}],
+            "generationConfig": {
+                "responseMimeType": "application/json",
+                "temperature": 0.3
+            }
+        }
+        
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.post(url, json=payload, timeout=30) as resp:
+                    if resp.status != 200:
+                        err_text = await resp.text()
+                        raise RuntimeError(f"Gemini returned status {resp.status}: {err_text}")
+                    data = await resp.json()
+                    response_text = data["candidates"][0]["content"]["parts"][0]["text"]
+        except Exception as e:
+            logger.error("gemini_request_failed", error=str(e))
+            response_text = ""
+            
+        return self._parse_json_response(response_text)
+
+    async def generate_daily_briefing(self, stats: Dict[str, Any]) -> str:
+        import aiohttp
+        prompt = self._build_briefing_prompt(stats)
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/{self.model_name}:generateContent?key={self.api_key}"
+        
+        payload = {
+            "contents": [{"parts": [{"text": prompt}]}],
+            "generationConfig": {
+                "temperature": 0.5
+            }
+        }
+        
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.post(url, json=payload, timeout=30) as resp:
+                    if resp.status != 200:
+                        raise RuntimeError(f"Gemini returned status {resp.status}")
+                    data = await resp.json()
+                    return data["candidates"][0]["content"]["parts"][0]["text"]
+        except Exception as e:
+            logger.error("gemini_briefing_failed", error=str(e))
+            return "Daily intelligence briefing temporarily unavailable."
+
+
+# ─────────────────────────────────────────────────────────────────
 #   AUTO-SELECTION FACTORY
 # ─────────────────────────────────────────────────────────────────
 _provider_instance: LLMProvider | None = None
@@ -308,16 +372,20 @@ def get_llm_provider() -> LLMProvider:
 
     Priority:
       1. OpenAI GPT-4o  — if OPENAI_API_KEY is set
-      2. Ollama Llama3  — local fallback (always available)
+      2. Gemini 1.5 Flash — if GEMINI_API_KEY is set
+      3. Ollama Llama3  — local fallback (always available)
     """
     global _provider_instance
     if _provider_instance is None:
         if settings.use_openai:
             _provider_instance = OpenAIProvider()
             logger.info("llm_auto_selected", provider="openai", reason="API key present")
+        elif settings.use_gemini:
+            _provider_instance = GeminiProvider()
+            logger.info("llm_auto_selected", provider="gemini", reason="API key present")
         else:
             _provider_instance = OllamaProvider()
-            logger.info("llm_auto_selected", provider="ollama", reason="No OpenAI key — using local LLM")
+            logger.info("llm_auto_selected", provider="ollama", reason="No OpenAI/Gemini key — using local LLM")
     return _provider_instance
 
 
